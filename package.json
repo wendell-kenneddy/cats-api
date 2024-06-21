@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon",
     "start": "NODE_ENV=production node ./dist/main.js",
+    "start:db": "ts-node ./src/db/createTables.ts",
     "build": "swc ./src/main.ts -o ./dist/main.js --config-file .swcrc"
   },
   "keywords": [],
