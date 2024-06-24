@@ -1,38 +1,41 @@
 import { Person, PersonsRepository } from "./PersonsRepository";
-import { verbose } from "sqlite3";
-const sqlite3 = verbose();
+import Database from "better-sqlite3";
 
 export class SQLitePersonsRepository implements PersonsRepository {
   constructor(private readonly dbPath: string) {}
 
-  create({ id, name, age }: Person): void {
-    const db = new sqlite3.Database(this.dbPath);
-    db.run(`INSERT INTO persons (id, name, age) VALUES ("${id}", "${name}", ${age});`);
+  createOne({ id, name, age }: Person): void {
+    const db = new Database(this.dbPath);
+    db.prepare(`INSERT INTO persons (id, name, age) VALUES ('${id}', '${name}', ${age});`).run();
     db.close();
   }
 
-  getOne(id: string, onFind: (person: Person) => void): void {
-    const db = new sqlite3.Database(this.dbPath);
+  getOne(id: string): Person {
+    const db = new Database(this.dbPath);
+    const statement = db.prepare(`SELECT * FROM persons WHERE id = '${id}'`);
+    const person = statement.get() as Person;
+    db.close();
+    return person;
+  }
 
-    db.get("SELECT * FROM persons WHERE id = ?", [id], (err, row) => {
-      if (err) throw err;
-      onFind(row as Person);
-    });
+  getAll(condition: string): Person[] {
+    const db = new Database(this.dbPath);
+    const statement = db.prepare(`SELECT * FROM persons ${condition}`);
+    const persons: Person[] = statement.all() as Person[];
+
+    db.close();
+    return persons;
+  }
+
+  deleteOne(id: string): void {
+    const db = new Database(this.dbPath);
+    db.prepare(`DELETE FROM persons WHERE id = '${id}'`).run();
     db.close();
   }
 
-  getAll(onEntry: (persons: Person[]) => void): void {
-    const db = new sqlite3.Database(this.dbPath);
-
-    db.all("SELECT * FROM persons", (err, rows) => {
-      if (err) throw err;
-      onEntry(rows as Person[]);
-    });
-
+  updateOne({ name, age, id }: Person): void {
+    const db = new Database(this.dbPath);
+    db.prepare(`UPDATE persons SET name = '${name}', age = '${age}' WHERE id = '${id}'`).run();
     db.close();
   }
-
-  delete(id: string): void {}
-
-  update(newData: Person): void {}
 }
