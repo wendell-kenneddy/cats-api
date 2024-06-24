@@ -5,9 +5,9 @@ export interface Person {
 }
 
 export abstract class PersonsRepository {
-  abstract getAll(onEntry: (persons: Person[]) => void): void;
-  abstract create(person: Person): void;
-  abstract getOne(id: string, onFind: (person: Person) => void): void;
-  abstract delete(id: string): void;
-  abstract update(newData: Person): void;
+  abstract getAll(condition: string): Person[];
+  abstract createOne(person: Person): void;
+  abstract getOne(id: string): Person;
+  abstract deleteOne(id: string): void;
+  abstract updateOne(newData: Person): void;
 }
